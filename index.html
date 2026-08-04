@@ -449,10 +449,14 @@ function renderCustomerDetail() {
               <span class="etd-label">PO #</span>
               <div style="color:#2563eb;font-size:14px;font-weight:600">${o.po}</div>
             </div>` : ''}
-            ${(o.unitPriceUSD != null || o.quantity != null) ? `<div>
-              <span class="etd-label">מחיר יחידה × כמות</span>
-              <div style="color:#334155;font-size:14px;font-weight:600">${o.unitPriceUSD != null ? usd2(o.unitPriceUSD) : '—'} × ${o.quantity != null ? o.quantity.toLocaleString('en-US') : '—'}</div>
-            </div>` : ''}
+            <div>
+              <span class="etd-label">מחיר יחידה ($)</span>
+              <div style="color:#334155;font-size:14px;font-weight:600">${o.unitPriceUSD != null ? usd2(o.unitPriceUSD) : '—'}</div>
+            </div>
+            <div>
+              <span class="etd-label">כמות</span>
+              <div style="color:#334155;font-size:14px;font-weight:600">${o.quantity != null ? o.quantity.toLocaleString('en-US') : '—'}</div>
+            </div>
           </div>
           <div class="flex items-center gap-12">
             <div>
