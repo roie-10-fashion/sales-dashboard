@@ -442,7 +442,7 @@ function renderCustomerDetail() {
       <div class="flex gap-10 items-center flex-wrap">
         <div><div class="field-label">תאריך ETD</div><input type="date" class="inp" id="newETD"></div>
         <div><div class="field-label">PO #</div><input class="inp" id="newOrderPO" placeholder="מספר הזמנה" style="width:130px"></div>
-        <div><div class="field-label">סכום ($)</div><input type="number" class="inp" id="newOrderAmount" placeholder="USD" style="width:120px"></div>
+        <div><div class="field-label">כמות</div><input type="number" class="inp" id="newOrderQty" placeholder="יח'" style="width:90px"></div><div><div class="field-label">מחיר יחידה ($)</div><input type="number" class="inp" id="newOrderUnitPrice" placeholder="$/יח'" step="0.01" style="width:110px"></div><div><div class="field-label">סכום ($)</div><input type="number" class="inp" id="newOrderAmount" placeholder="USD" style="width:120px"></div>
         <div><div class="field-label">שער ¥/$</div><input type="number" class="inp" id="newOrderRate" value="${state.defaultRate}" step="0.01" style="width:90px"></div>
         <div style="align-self:flex-end;padding:8px 0" id="newOrderPreview"></div>
       </div>
@@ -467,7 +467,7 @@ function renderCustomerDetail() {
         <div class="flex gap-10 items-center flex-wrap">
           <div><div class="field-label">תאריך ETD</div><input type="date" class="inp" id="editETD" value="${o.etd}"></div>
           <div><div class="field-label">PO #</div><input class="inp" id="editPO" value="${(o.po || '').replace(/"/g, '&quot;')}" placeholder="מספר הזמנה" style="width:130px"></div>
-          <div><div class="field-label">סכום ($)</div><input type="number" class="inp" id="editAmount" value="${o.amountUSD}" style="width:120px"></div>
+          <div><div class="field-label">כמות</div><input type="number" class="inp" id="editQty" value="${o.qty != null ? o.qty : ''}" placeholder="יח'" style="width:90px"></div><div><div class="field-label">מחיר יחידה ($)</div><input type="number" class="inp" id="editUnitPrice" value="${o.unitPrice != null ? o.unitPrice : ''}" placeholder="$/יח'" step="0.01" style="width:110px"></div><div><div class="field-label">סכום ($)</div><input type="number" class="inp" id="editAmount" value="${o.amountUSD}" style="width:120px"></div>
           <div><div class="field-label">שער ¥/$</div><input type="number" class="inp" id="editRate" value="${getRate(o)}" step="0.01" style="width:90px"></div>
           <div style="align-self:flex-end;padding:8px 0"><span id="editPreview" style="color:#d97706;font-size:13px;font-weight:600">= ${rmb(getRMB(o))}</span></div>
         </div>
@@ -496,7 +496,7 @@ function renderCustomerDetail() {
           </div>
           <div class="flex items-center gap-12">
             <div>
-              <span style="color:#b45309;font-weight:700;font-size:15px">${usd(o.amountUSD)}</span>
+              ${(o.qty != null && o.unitPrice != null) ? `<span style="color:#64748b;font-size:12px;margin-left:8px">${o.qty} × $${fmtDec(o.unitPrice)}</span>` : ''}<span style="color:#b45309;font-weight:700;font-size:15px">${usd(o.amountUSD)}</span>
               <span style="color:#cbd5e1;margin:0 6px">|</span>
               <span style="color:#d97706;font-size:13px;font-weight:500">${rmb(getRMB(o))}</span>
             </div>
@@ -692,7 +692,7 @@ function bindEvents() {
       const a = parseFloat(nAmt.value) || 0, r = parseFloat(nRate.value) || 0;
       nPrev.innerHTML = a && r ? `<span style="color:#d97706;font-size:14px;font-weight:700">= ${rmb(a * r)}</span>` : '';
     };
-    nAmt.addEventListener('input', up); nRate.addEventListener('input', up);
+    nAmt.addEventListener('input', up); nRate.addEventListener('input', up); const nQty = document.getElementById('newOrderQty'); const nUnitPrice = document.getElementById('newOrderUnitPrice'); const autoCalcNew = () => { const q = parseFloat(nQty.value), up2 = parseFloat(nUnitPrice.value); if (q && up2) { nAmt.value = (q * up2).toFixed(2); } up(); }; if (nQty) nQty.addEventListener('input', autoCalcNew); if (nUnitPrice) nUnitPrice.addEventListener('input', autoCalcNew);
   }
 
   const btnSaveOrder = document.getElementById('btnSaveOrder');
@@ -704,7 +704,7 @@ function bindEvents() {
     const po = document.getElementById('newOrderPO').value.trim();
     const notes = document.getElementById('newOrderNotes').value.trim();
     const c = state.customers.find(x => x.id === state.selectedCustomer);
-    if (c) { c.orders.push({ id: genId(), etd, po, amountUSD: amount, rate, notes }); state.showAddOrder = false; saveData(); render(); }
+    const qtyVal = parseFloat(document.getElementById('newOrderQty').value); const unitPriceVal = parseFloat(document.getElementById('newOrderUnitPrice').value); const newOrderObj = { id: genId(), etd, po, amountUSD: amount, rate, notes }; if (qtyVal) newOrderObj.qty = qtyVal; if (unitPriceVal) newOrderObj.unitPrice = unitPriceVal; if (c) { c.orders.push(newOrderObj); state.showAddOrder = false; saveData(); render(); }
   });
 
   document.querySelectorAll('[data-edit-order]').forEach(btn => {
@@ -721,7 +721,7 @@ function bindEvents() {
       const a = parseFloat(eAmt.value) || 0, r = parseFloat(eRate.value) || 0;
       ePrev.textContent = a && r ? `= ${rmb(a * r)}` : '';
     };
-    eAmt.addEventListener('input', up); eRate.addEventListener('input', up);
+    eAmt.addEventListener('input', up); eRate.addEventListener('input', up); const eQty = document.getElementById('editQty'); const eUnitPrice = document.getElementById('editUnitPrice'); const autoCalcEdit = () => { const q = parseFloat(eQty.value), up2 = parseFloat(eUnitPrice.value); if (q && up2) { eAmt.value = (q * up2).toFixed(2); } up(); }; if (eQty) eQty.addEventListener('input', autoCalcEdit); if (eUnitPrice) eUnitPrice.addEventListener('input', autoCalcEdit);
   }
 
   const btnSaveEdit = document.getElementById('btnSaveEdit');
@@ -733,7 +733,7 @@ function bindEvents() {
     const c = state.customers.find(x => x.id === state.selectedCustomer);
     if (c) {
       const o = c.orders.find(x => x.id === state.editingOrder);
-      if (o) { o.etd = etd; o.amountUSD = amount; o.rate = rate; o.po = document.getElementById('editPO').value.trim(); o.notes = document.getElementById('editNotes').value.trim(); }
+      if (o) { o.etd = etd; o.amountUSD = amount; o.rate = rate; o.po = document.getElementById('editPO').value.trim(); o.notes = document.getElementById('editNotes').value.trim(); const qtyVal = parseFloat(document.getElementById('editQty').value); const unitPriceVal = parseFloat(document.getElementById('editUnitPrice').value); if (qtyVal) { o.qty = qtyVal; } else { delete o.qty; } if (unitPriceVal) { o.unitPrice = unitPriceVal; } else { delete o.unitPrice; } }
       state.editingOrder = null; saveData(); render();
     }
   });
@@ -774,8 +774,8 @@ function bindEvents() {
 
 function exportCSV() {
   const orders = [...allOrders()].sort((a, b) => b.etd.localeCompare(a.etd));
-  let csv = '\uFEFF' + 'לקוח,תאריך ETD,PO,סכום USD,שער,סכום RMB,הערות\n';
-  orders.forEach(o => { csv += `"${o.customerName}",${o.etd},"${o.po || ''}",${o.amountUSD},${fmtDec(getRate(o))},${Math.round(getRMB(o))},"${o.notes || ''}"\n`; });
+  let csv = '\uFEFF' + 'לקוח,תאריך ETD,PO,כמות,מחיר יחידה USD,סכום USD,שער,סכום RMB,הערות\n';
+  orders.forEach(o => { csv += `"${o.customerName}",${o.etd},"${o.po || ''}",${o.qty != null ? o.qty : ''},${o.unitPrice != null ? fmtDec(o.unitPrice) : ''},${o.amountUSD},${fmtDec(getRate(o))},${Math.round(getRMB(o))},"${o.notes || ''}"\n`; });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = 'sales_export.csv'; a.click();
