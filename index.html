@@ -325,7 +325,7 @@ function allOrders() {
 function grandTotal() {
   let tUSD = 0, tRMB = 0, count = 0;
   state.customers.forEach(c => c.orders.forEach(o => { tUSD += o.amountUSD; tRMB += getRMB(o); count++; }));
-  const exT = extrasTotal(allExtras()); tUSD += exT; tRMB += exT * state.defaultRate;
+  const exT = extrasSales(allExtras()); tUSD += exT; tRMB += exT * state.defaultRate;
   return { usd: tUSD, rmb: tRMB, count };
 }
 function invDate(o) { return o.invoiceDate || o.etd; }
@@ -359,6 +359,7 @@ var CLOCKS = [
   { label: 'USA · California', tz: 'America/Los_Angeles' }
 ];
 function extrasTotal(list) { return (list || []).reduce(function (s, e) { return s + (Number(e.amountUSD) || 0); }, 0); }
+function extrasSales(list) { return (list || []).reduce(function (s, e) { var a = Number(e.amountUSD) || 0; return a > 0 ? s + a : s; }, 0); }
 function allExtras() { var a = []; state.customers.forEach(function (c) { (c.extras || []).forEach(function (e) { a.push(e); }); }); return a; }
 function addExtra() {
   var c = state.customers.find(function (x) { return x.id === state.selectedCustomer; });
@@ -409,7 +410,7 @@ function renderHeader(gt) {
       '<p class="header-sub">מערכת ניהול מכירות</p>' +
     '</div>' +
     '<div class="hdr-side hdr-left">' +
-      '<div class="stat-box gold"><div class="stat-label">סה״כ מכירות</div><div class="stat-val-usd">' + usd(gt.usd) + '</div><div class="stat-val-rmb">' + rmb(gt.rmb) + '</div>' + (allExtras().length ? '<div class="rate-hint" style="margin-top:4px">כולל דוגמאות וזיכויים: ' + usd(extrasTotal(allExtras())) + '</div>' : '') + '</div>' +
+      '<div class="stat-box gold"><div class="stat-label">סה״כ מכירות</div><div class="stat-val-usd">' + usd(gt.usd) + '</div><div class="stat-val-rmb">' + rmb(gt.rmb) + '</div>' + (allExtras().length ? '<div class="rate-hint" style="margin-top:4px">כולל דוגמאות: ' + usd(extrasSales(allExtras())) + ' · זיכויים (לא מנוכים): ' + usd(extrasTotal(allExtras()) - extrasSales(allExtras())) + '</div>' : '') + '</div>' +
       '<div class="stat-box blue"><div class="stat-label">שער ברירת מחדל</div><input type="number" class="rate-input" value="' + state.defaultRate + '" step="0.01" id="defaultRate"><div class="rate-hint">להזמנות חדשות</div></div>' +
     '</div>' +
   '</div>' +
@@ -446,8 +447,8 @@ function renderCustomersList() {
   }
   html += `<div class="grid gap-12">`;
   state.customers.forEach(c => {
-    const tot = c.orders.reduce((s, o) => s + o.amountUSD, 0) + extrasTotal(c.extras);
-    const totRMB = c.orders.reduce((s, o) => s + getRMB(o), 0) + extrasTotal(c.extras) * state.defaultRate;
+    const tot = c.orders.reduce((s, o) => s + o.amountUSD, 0) + extrasSales(c.extras);
+    const totRMB = c.orders.reduce((s, o) => s + getRMB(o), 0) + extrasSales(c.extras) * state.defaultRate;
     const sorted = [...c.orders].sort((a, b) => b.etd.localeCompare(a.etd));
     const lastETD = sorted.length ? sorted[0].etd : '—';
     html += `
@@ -484,8 +485,8 @@ function renderCustomersList() {
 function renderCustomerDetail() {
   const c = state.customers.find(x => x.id === state.selectedCustomer);
   if (!c) return '';
-  const totUSD = c.orders.reduce((s, o) => s + o.amountUSD, 0) + extrasTotal(c.extras);
-  const totRMB = c.orders.reduce((s, o) => s + getRMB(o), 0) + extrasTotal(c.extras) * state.defaultRate;
+  const totUSD = c.orders.reduce((s, o) => s + o.amountUSD, 0) + extrasSales(c.extras);
+  const totRMB = c.orders.reduce((s, o) => s + getRMB(o), 0) + extrasSales(c.extras) * state.defaultRate;
 
   let html = `
     <button class="btn-s" id="btnBack" style="margin-bottom:16px">→ חזרה לרשימה</button>
@@ -594,7 +595,7 @@ function renderCustomerDetail() {
   const ex = c.extras || [];
   html += `<div class="card" style="margin-top:20px;padding:14px 18px">
     <div class="flex-between" style="margin-bottom:10px">
-      <h3 style="font-size:15px;font-weight:600;color:#334155">דוגמאות וזיכויים <span style="font-size:11px;color:#8a857a;font-weight:400">(נכללים בסה״כ המכירות)</span></h3>
+      <h3 style="font-size:15px;font-weight:600;color:#334155">דוגמאות וזיכויים <span style="font-size:11px;color:#8a857a;font-weight:400">(דוגמאות נכללות בסה״כ המכירות, זיכויים לא)</span></h3>
       <div style="font-weight:700;color:#b45309">${usd(extrasTotal(ex))}</div>
     </div>
     ${ex.map(e => `<div class="flex-between" style="padding:6px 0;border-top:1px solid #f1f5f9;font-size:13px"><span>${e.date || ''} <b>${e.amountUSD < 0 ? 'זיכוי' : 'דוגמה'}</b> ${e.label || ''}</span><span style="color:${e.amountUSD < 0 ? '#b91c1c' : '#15803d'}">${usd(e.amountUSD)} <button class="btn-del" style="margin-right:8px" onclick="delExtra('${e.id}')">🗑</button></span></div>`).join('')}
