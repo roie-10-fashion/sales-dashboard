@@ -242,6 +242,21 @@
   .clk-dot { width:7px; height:7px; border-radius:50%; background:#3a3a3a; }
   .clk-dot.on { background:#a8864f; box-shadow:0 0 6px rgba(168,134,79,.8); }
   @media (max-width:760px) { .header { grid-template-columns:1fr; text-align:center; } .hdr-side,.hdr-right,.hdr-left { justify-self:center; align-items:center; justify-content:center; } .hdr-right { flex-direction:row; } .clock-bar { gap:18px; } }
+
+  @media (max-width:640px) {
+    .header { grid-template-columns:1fr !important; gap:10px !important; padding:14px 12px !important; }
+    .logo-svg { height:54px !important; }
+    .hdr-logo { order:1; } .hdr-left { order:2; } .hdr-right { order:3; flex-direction:row !important; justify-content:center; width:100%; }
+    .hdr-logo .header-sub { font-size:9px !important; letter-spacing:2px !important; margin-top:6px !important; }
+    .hdr-left { display:grid !important; grid-template-columns:1.5fr 1fr; gap:8px !important; width:100%; }
+    .hdr-left .stat-box { padding:8px 6px !important; }
+    .stat-val-usd { font-size:18px !important; } .stat-val-rmb { font-size:11px; }
+    .rate-hint { font-size:10px; line-height:1.5; }
+    .clock-bar { display:grid !important; grid-template-columns:1fr 1fr; gap:6px 8px !important; padding:8px 10px !important; }
+    .clk { justify-content:center; gap:6px; } .clk-time { font-size:15px; } .clk-city { font-size:10px; letter-spacing:1px; }
+    .tabs { padding:0 4px !important; } .tab-btn { padding:10px 8px !important; font-size:12px; }
+    .content { padding:12px !important; }
+  }
 </style>
 </head>
 <body>
@@ -416,7 +431,7 @@ function renderHeader(gt) {
       '<p class="header-sub">מערכת ניהול מכירות</p>' +
     '</div>' +
     '<div class="hdr-side hdr-left">' +
-      '<div class="stat-box gold"><div class="stat-label">סה״כ מכירות</div><div class="stat-val-usd">' + usd(gt.usd) + '</div><div class="stat-val-rmb">' + rmb(gt.rmb) + '</div>' + (allExtras().length ? '<div class="rate-hint" style="margin-top:4px">כולל דוגמאות: ' + usd(extrasSales(allExtras())) + ' · זיכויים (לא מנוכים): ' + usd(extrasTotal(allExtras()) - extrasSales(allExtras())) + '</div>' : '') + '</div>' +
+      '<div class="stat-box gold"><div class="stat-label">סה״כ מכירות</div><div class="stat-val-usd">' + usd(gt.usd) + '</div><div class="stat-val-rmb">' + rmb(gt.rmb) + '</div>' + (allExtras().length ? '<div class="rate-hint" style="margin-top:4px">כולל דוגמאות: <bdi>' + usd(extrasSales(allExtras())) + '</bdi></div><div class="rate-hint">זיכויים (לא מנוכים): <bdi>−' + usd(Math.abs(extrasTotal(allExtras()) - extrasSales(allExtras()))) + '</bdi></div>' : '') + '</div>' +
       '<div class="stat-box blue"><div class="stat-label">שער ברירת מחדל</div><input type="number" class="rate-input" value="' + state.defaultRate + '" step="0.01" id="defaultRate"><div class="rate-hint">להזמנות חדשות</div></div>' +
     '</div>' +
   '</div>' +
