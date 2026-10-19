@@ -248,7 +248,7 @@
     .logo-svg { height:54px !important; }
     .hdr-logo { order:1; } .hdr-left { order:2; } .hdr-right { order:3; flex-direction:row !important; justify-content:center; width:100%; }
     .hdr-logo .header-sub { font-size:9px !important; letter-spacing:2px !important; margin-top:6px !important; }
-    .hdr-left { display:grid !important; grid-template-columns:1.5fr 1fr; gap:8px !important; width:100%; }
+    .hdr-left { display:flex !important; justify-content:center; width:100%; } .hdr-left .stat-box { min-width:72%; } .hdr-right:empty { display:none; }
     .hdr-left .stat-box { padding:8px 6px !important; }
     .stat-val-usd { font-size:18px !important; } .stat-val-rmb { font-size:11px; }
     .rate-hint { font-size:10px; line-height:1.5; }
@@ -422,9 +422,9 @@ if (!window.__clkTimer) window.__clkTimer = setInterval(clkTick, 1000);
 function renderHeader(gt) {
   return '<div class="header">' +
     '<div class="hdr-side hdr-right">' +
-      '<button class="btn-p" id="btnBackup" style="font-size:11px;padding:5px 12px">📥 גיבוי נתונים</button>' +
-      '<button class="btn-s" id="btnRestore" style="font-size:11px;padding:5px 12px">📤 שחזור נתונים</button>' +
-      '<input type="file" id="restoreFile" accept=".json" style="display:none">' +
+      
+      
+      
     '</div>' +
     '<div class="hdr-logo">' +
       '<svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 623 562" role="img" aria-label="10 FASHION"><path fill="#fff" fill-rule="evenodd" d="M564 480 564 558 572 559 574 558 574 500 611 558 622 559 622 480 613 479 612 481 613 537 611 538 576 482 572 479Z M456 479 454 485 454 557 457 559 464 559 465 557 465 481 463 479Z M378 480 378 558 387 559 389 557 389 524 390 522 417 522 423 522 425 524 425 557 428 559 435 559 436 556 436 481 433 479 427 479 425 481 425 510 424 512 391 512 389 511 389 481 387 479Z M270 479 266 486 241 558 252 558 260 537 262 534 286 534 289 536 295 557 297 559 306 559 308 557 282 482 280 480Z M274 495 276 497 284 521 283 525 266 525 264 524Z M241 479 198 480 198 557 199 559 209 558 209 525 211 523 237 523 239 521 238 514 212 514 209 512 209 490 211 489 241 488 242 487Z M510 478 498 481 486 492 480 503 478 523 481 538 491 552 502 558 516 560 534 554 543 546 549 532 550 512 547 498 537 485 525 479Z M512 487 519 488 527 492 534 499 539 512 538 530 534 539 525 547 516 550 508 550 497 541 492 532 490 522 490 511 494 499 501 492Z M356 479 337 478 330 480 323 485 317 494 317 504 322 514 328 519 346 526 351 532 353 538 350 546 343 550 333 550 318 545 316 554 319 557 331 560 347 559 356 554 362 546 364 537 360 525 351 517 333 508 328 500 329 493 337 488 347 487 357 491 361 483Z M459 24 447 17 424 6 391 0 364 0 348 2 325 9 315 14 155 448 154 446 153 137 131 136 82 174 0 222 0 227 4 233 75 192 79 193 79 548 78 550 66 550 27 550 25 551 26 561 126 560 228 285 230 283 242 337 249 355 259 374 270 389 288 407 301 417 319 426 344 433 363 436 389 436 415 432 438 423 455 413 480 389 492 371 504 347 510 330 519 299 526 252 528 193 523 148 517 119 510 98 499 72 489 56 479 43Z"/></svg>' +
@@ -432,7 +432,7 @@ function renderHeader(gt) {
     '</div>' +
     '<div class="hdr-side hdr-left">' +
       '<div class="stat-box gold"><div class="stat-label">סה״כ מכירות</div><div class="stat-val-usd">' + usd(gt.usd) + '</div><div class="stat-val-rmb">' + rmb(gt.rmb) + '</div>' + (allExtras().length ? '<div class="rate-hint" style="margin-top:4px">כולל דוגמאות: <bdi>' + usd(extrasSales(allExtras())) + '</bdi></div><div class="rate-hint">זיכויים (לא מנוכים): <bdi>−' + usd(Math.abs(extrasTotal(allExtras()) - extrasSales(allExtras()))) + '</bdi></div>' : '') + '</div>' +
-      '<div class="stat-box blue"><div class="stat-label">שער ברירת מחדל</div><input type="number" class="rate-input" value="' + state.defaultRate + '" step="0.01" id="defaultRate"><div class="rate-hint">להזמנות חדשות</div></div>' +
+      
     '</div>' +
   '</div>' +
   '<div class="clock-bar">' + clkHTML() + '</div>';
