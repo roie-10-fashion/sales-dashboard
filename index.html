@@ -828,5 +828,180 @@ function restoreData(e) {
 
 loadData(); render();
 </script>
+<script>
+/* ===== Cloud sync (GitHub data.json) ===== */
+(function () {
+  var OWNER = 'roie-10-fashion', REPO = 'sales-dashboard', PATH = 'data.json', BR = 'main';
+  var API = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + PATH;
+  var TK = 'salesGhToken_v1', DK = 'sales_dirty_v1', PRE = 'sales_dashboard_v5_prebackup';
+  var sha = null, remoteExists = false, pushing = false, again = false, timer = null, lastMsg = '';
+  function tok() { return localStorage.getItem(TK) || ''; }
+  function isDirty() { return localStorage.getItem(DK) === '1'; }
+  function setDirty(v) { if (v) localStorage.setItem(DK, '1'); else localStorage.removeItem(DK); }
+  function b64e(s) { return btoa(unescape(encodeURIComponent(s))); }
+  function b64d(s) { return decodeURIComponent(escape(atob(s.split(String.fromCharCode(10)).join('')))); }
+  function persistLocal() { try { localStorage.setItem('sales_dashboard_v5', JSON.stringify(state.customers)); } catch (e) {} }
+  function idle() { return !state.showAddOrder && !state.showAddCustomer && !state.editingOrder; }
+
+  function status(msg, color) {
+    lastMsg = msg;
+    var b = document.getElementById('cloudBadge');
+    if (!b) return;
+    b.textContent = msg;
+    b.style.borderColor = color;
+    b.style.color = color;
+  }
+
+  async function fetchRemote() {
+    var h = { 'Accept': 'application/vnd.github+json' };
+    if (tok()) h['Authorization'] = 'Bearer ' + tok();
+    var res = await fetch(API + '?ref=' + BR + '&_=' + Date.now(), { headers: h, cache: 'no-store' });
+    if (res.status === 404) { sha = null; remoteExists = false; return null; }
+    if (!res.ok) throw new Error('load ' + res.status);
+    var j = await res.json();
+    sha = j.sha; remoteExists = true;
+    return JSON.parse(b64d(j.content));
+  }
+
+  function merge(remoteC, localC) {
+    var out = JSON.parse(JSON.stringify(remoteC || []));
+    localC.forEach(function (lc) {
+      var rc = out.find(function (x) { return x.id === lc.id; });
+      if (!rc) { out.push(lc); return; }
+      rc.name = lc.name;
+      lc.orders.forEach(function (lo) {
+        var i = rc.orders.findIndex(function (x) { return x.id === lo.id; });
+        if (i < 0) rc.orders.push(lo); else rc.orders[i] = lo;
+      });
+    });
+    return out;
+  }
+
+  async function push(force) {
+    if (!tok()) { status('☁ אין חיבור לענן – לחץ', '#c9a35f'); return false; }
+    if (pushing) { again = true; return false; }
+    pushing = true;
+    status('☁ שומר…', '#c9a35f');
+    try {
+      for (var attempt = 0; attempt < 2; attempt++) {
+        var body = {
+          message: 'עדכון נתונים ' + new Date().toISOString(),
+          content: b64e(JSON.stringify({ customers: state.customers, defaultRate: state.defaultRate, updatedAt: Date.now() }, null, 1)),
+          branch: BR
+        };
+        if (sha) body.sha = sha;
+        var res = await fetch(API, {
+          method: 'PUT',
+          headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + tok(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if ((res.status === 409 || res.status === 422) && attempt === 0) {
+          var remote = await fetchRemote();
+          if (remote && !force) { state.customers = merge(remote.customers, state.customers); persistLocal(); }
+          continue;
+        }
+        if (!res.ok) throw new Error('save ' + res.status);
+        var j = await res.json();
+        sha = j.content.sha; remoteExists = true; setDirty(false);
+        status('☁ נשמר בענן ✓', '#7fb685');
+        pushing = false;
+        if (again) { again = false; schedule(); }
+        return true;
+      }
+    } catch (e) {
+      status('☁ שגיאת שמירה – לחץ', '#d87a7a');
+    }
+    pushing = false;
+    return false;
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    if (!tok() || !remoteExists) { status(tok() ? '☁ לא הועלה לענן – לחץ' : '☁ אין חיבור לענן – לחץ', '#c9a35f'); return; }
+    timer = setTimeout(function () { push(false); }, 1200);
+  }
+
+  var origSave = saveData;
+  saveData = function () { origSave(); setDirty(true); schedule(); };
+
+  async function applyRemote(remote) {
+    state.customers = remote.customers;
+    if (remote.defaultRate) state.defaultRate = remote.defaultRate;
+    persistLocal();
+    render();
+  }
+
+  async function sync(initial) {
+    try {
+      var remote = await fetchRemote();
+      if (!remote) { status(tok() ? '☁ לא הועלה לענן – לחץ' : '☁ אין חיבור לענן – לחץ', '#c9a35f'); return; }
+      if (isDirty()) {
+        if (tok()) {
+          state.customers = merge(remote.customers, state.customers);
+          persistLocal();
+          await push(false);
+          render();
+        } else {
+          status('☁ שינויים מקומיים לא נשמרו – לחץ', '#d87a7a');
+        }
+        return;
+      }
+      var same = JSON.stringify(remote.customers) === JSON.stringify(state.customers);
+      if (!same) {
+        if (!initial && !idle()) return;
+        try { localStorage.setItem(PRE, JSON.stringify(state.customers)); } catch (e) {}
+        await applyRemote(remote);
+      }
+      status('☁ מסונכרן ✓', '#7fb685');
+    } catch (e) {
+      status('☁ אין חיבור – עובד מקומית', '#d87a7a');
+    }
+  }
+
+  function panel() {
+    var old = document.getElementById('cloudPanel');
+    if (old) { old.remove(); return; }
+    var d = document.createElement('div');
+    d.id = 'cloudPanel';
+    d.style.cssText = 'position:fixed;bottom:60px;left:16px;z-index:9000;width:320px;background:#0d0d0d;color:#eee9dd;border:1px solid #a8864f;padding:16px;font-size:13px;direction:rtl;line-height:1.7';
+    d.innerHTML = '<div style="font-weight:700;margin-bottom:6px">סנכרון לענן (GitHub)</div>' +
+      '<div style="color:#a9a397;margin-bottom:8px">' + (tok() ? 'טוקן שמור במכשיר זה.' : 'הדבק טוקן GitHub (נשמר רק בדפדפן הזה).') + '</div>' +
+      '<input type="password" id="cloudTok" placeholder="github_pat_..." style="width:100%;padding:6px;background:#1a1a1a;color:#fff;border:1px solid #444;margin-bottom:8px">' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button id="cloudSaveTok" class="btn-s" style="color:#fff;border-color:#a8864f">שמור טוקן</button>' +
+      '<button id="cloudUpload" class="btn-s" style="color:#fff;border-color:#a8864f">העלה את הנתונים מהדפדפן הזה לענן</button>' +
+      '<button id="cloudClose" class="btn-s" style="color:#fff;border-color:#555">סגור</button></div>' +
+      '<div id="cloudMsg" style="margin-top:8px;color:#c9a35f"></div>';
+    document.body.appendChild(d);
+    document.getElementById('cloudClose').onclick = function () { d.remove(); };
+    document.getElementById('cloudSaveTok').onclick = async function () {
+      var v = document.getElementById('cloudTok').value.trim();
+      if (!v) return;
+      localStorage.setItem(TK, v);
+      document.getElementById('cloudMsg').textContent = 'הטוקן נשמר.';
+      await sync(false);
+    };
+    document.getElementById('cloudUpload').onclick = async function () {
+      if (!tok()) { document.getElementById('cloudMsg').textContent = 'קודם שמור טוקן.'; return; }
+      if (!confirm('להעלות את הנתונים מהדפדפן הזה לענן? זה יחליף את מה ששמור שם.')) return;
+      try { await fetchRemote(); } catch (e) {}
+      var ok = await push(true);
+      document.getElementById('cloudMsg').textContent = ok ? 'הועלה בהצלחה ✓' : 'ההעלאה נכשלה – בדוק את הטוקן.';
+    };
+  }
+
+  var badge = document.createElement('div');
+  badge.id = 'cloudBadge';
+  badge.style.cssText = 'position:fixed;bottom:16px;left:16px;z-index:9000;background:#0d0d0d;border:1px solid #a8864f;color:#c9a35f;font-size:12px;padding:6px 12px;cursor:pointer;direction:rtl';
+  badge.onclick = panel;
+  document.body.appendChild(badge);
+  status('☁ בודק…', '#c9a35f');
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && !pushing && !isDirty()) sync(false);
+  });
+  sync(true);
+})();
+</script>
 </body>
 </html>
