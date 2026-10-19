@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>מערכת ניהול מכירות</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -167,6 +167,55 @@
     .tabs { padding: 0 16px; overflow-x: auto; }
     .tab-btn { padding: 12px 14px; font-size: 13px; }
   }
+  /* ===== 10 FASHION luxury theme ===== */
+  :root { --ink:#0d0d0d; --ivory:#f6f4ef; --paper:#fffefb; --line:#e4dfd3; --gold:#a8864f; --mute:#8a857a; }
+  body { background: var(--ivory); color: var(--ink); font-weight: 300; }
+  .header { background: var(--ink); border-bottom: 1px solid var(--gold); padding: 26px 40px; color: #eee9dd; }
+  .brand { display:flex; align-items:baseline; gap:14px; direction:ltr; }
+  .brand-10 { font-family:'Cormorant Garamond','Frank Ruhl Libre',serif; font-size:54px; font-weight:500; line-height:1; color:#fff; letter-spacing:-2px; }
+  .brand-10 i { font-style:normal; display:inline-block; transform:skewX(-14deg); margin-left:-4px; }
+  .brand-word { font-family:'Cormorant Garamond',serif; font-size:17px; letter-spacing:8px; color:#fff; font-weight:500; }
+  .header-sub { margin-top:8px; color:var(--gold); letter-spacing:3px; font-size:11px; font-weight:400; }
+  .stat-box.gold, .stat-box.blue { background:transparent; border:1px solid rgba(168,134,79,.55); border-radius:2px; padding:10px 22px; }
+  .stat-label { color:#a9a397; letter-spacing:2px; font-size:10px; }
+  .stat-val-usd { color:#fff; font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:500; }
+  .stat-val-rmb { color:var(--gold); }
+  .rate-input { color:#fff; border:none; border-bottom:1px solid var(--gold); border-radius:0; font-family:'Cormorant Garamond',serif; font-size:22px; }
+  .rate-hint { color:#8f897c; }
+  .tabs { background:var(--paper); border-bottom:1px solid var(--line); padding:0 40px; }
+  .tab-btn { color:var(--mute); letter-spacing:1px; font-weight:400; border-bottom-width:2px; }
+  .tab-btn.active { color:var(--ink); border-bottom-color:var(--ink); font-weight:600; }
+  .tab-badge, .tab-btn.active .tab-badge { background:transparent; border:1px solid var(--line); color:var(--mute); border-radius:2px; }
+  .content { padding:36px 40px; }
+  .card { background:var(--paper); border:1px solid var(--line); border-radius:2px; box-shadow:none; }
+  .card:hover { box-shadow:0 8px 24px rgba(0,0,0,.06); }
+  .card.clickable:hover { border-color:var(--ink); }
+  .card.gold-border { background:var(--paper); border:1px solid var(--gold); }
+  .inp { background:var(--paper); border:1px solid var(--line); border-radius:2px; }
+  .inp:focus { border-color:var(--ink); box-shadow:none; }
+  .btn-p { background:var(--ink); color:#fff; border-radius:2px; box-shadow:none; letter-spacing:1px; font-weight:500; }
+  .btn-p:hover { background:#2a2a2a; filter:none; transform:none; }
+  .btn-s { background:transparent; color:var(--ink); border:1px solid var(--ink); border-radius:2px; }
+  .btn-s:hover { background:var(--ink); color:#fff; }
+  .btn-edit, .btn-del { background:transparent; border-radius:2px; border:1px solid var(--line); color:var(--ink); }
+  .btn-del { color:#9b3a3a; }
+  .btn-edit:hover, .btn-del:hover { border-color:var(--ink); background:transparent; }
+  .rate-badge { background:transparent; border:1px solid var(--line); color:var(--mute); border-radius:2px; }
+  .cust-icon { background:var(--ink); border:none; border-radius:2px; font-size:0 !important; color:#fff; }
+  .cust-icon::after { content:'10'; font-family:'Cormorant Garamond',serif; font-size:18px; color:#fff; font-weight:500; }
+  th { background:transparent; color:var(--mute); letter-spacing:2px; border-bottom:1px solid var(--ink); font-weight:500; }
+  td { border-bottom:1px solid var(--line); }
+  tbody tr:hover { background:#f1eee6; }
+  .chart-bar { background:var(--ink) !important; border-radius:0; max-width:28px; }
+  .chart-label, .field-label, .etd-label { color:var(--mute); letter-spacing:1px; }
+  h2 { font-family:'Frank Ruhl Libre','Cormorant Garamond',serif; font-weight:500; letter-spacing:.5px; }
+  [style*="#b45309"], [style*="#d97706"] { color:var(--ink) !important; }
+  [style*="#2563eb"] { color:var(--gold) !important; }
+  [style*="#1e293b"], [style*="#334155"] { color:var(--ink) !important; }
+  .card [style*="#b45309"] { font-family:'Cormorant Garamond',serif; font-size:19px !important; font-weight:600 !important; }
+  #btnBackup { background:transparent !important; border:1px solid var(--gold) !important; color:var(--gold) !important; border-radius:2px; }
+  #btnRestore { color:#d8d2c4 !important; border-color:rgba(255,255,255,.25) !important; }
+  #btnRestore:hover { background:#fff; color:var(--ink) !important; }
 </style>
 </head>
 <body>
@@ -285,8 +334,8 @@ function renderHeader(gt) {
   return `
   <div class="header">
     <div>
-      <h1>💰 מערכת ניהול מכירות</h1>
-      <p class="header-sub">ריכוז הזמנות · לקוחות · סיכומים</p>
+      <div class="brand"><span class="brand-10">1<i>0</i></span><span class="brand-word">FASHION</span></div>
+      <p class="header-sub">מערכת ניהול מכירות</p>
     </div>
     <div class="header-stats">
       <div class="stat-box gold">
