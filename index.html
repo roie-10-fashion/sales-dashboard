@@ -257,6 +257,21 @@
     .tabs { padding:0 4px !important; } .tab-btn { padding:10px 8px !important; font-size:12px; }
     .content { padding:12px !important; }
   }
+
+  /* v4 look */
+  .stat-box.gold { background:linear-gradient(135deg,#f7f2e7,#e8dcc0) !important; border:1px solid #a8864f !important; border-radius:6px !important; box-shadow:0 2px 10px rgba(168,134,79,.25); }
+  .stat-box.gold .stat-label { color:#6b5a3a !important; letter-spacing:2px; }
+  .stat-box.gold .stat-val-usd { color:#0d0d0d !important; }
+  .stat-box.gold .stat-val-rmb { color:#8a6a35 !important; }
+  .stat-box.gold .rate-hint { color:#6b6455 !important; }
+  @media (max-width:640px) {
+    .clock-bar { grid-template-columns:repeat(4,1fr) !important; gap:0 !important; padding:8px 4px !important; }
+    .clk { flex-direction:column; align-items:center; gap:2px !important; padding:2px; border-inline-start:1px solid rgba(168,134,79,.25); }
+    .clk:first-child { border-inline-start:none; }
+    .clk-city { order:1; font-size:9px !important; letter-spacing:.5px !important; text-align:center; line-height:1.2; color:#b9b2a2; }
+    .clk-time { order:2; font-size:15px !important; letter-spacing:0 !important; }
+    .clk-dot { order:3; margin-top:2px; }
+  }
 </style>
 </head>
 <body>
