@@ -69,16 +69,19 @@
      "etd": "2026-07-25",
      "po": "003499",
      "amountUSD": 2154.72,
-     "rate": 6.8,
-     "notes": ""
+     "rate": 6.79,
+     "notes": "",
+     "invoiceDate": "2026-07-09",
+     "paidUSD": 2111.63
     },
     {
      "id": 1783932784118.8027,
      "etd": "2026-10-09",
      "po": "003632",
-     "amountUSD": 22647.6,
-     "rate": 6.6,
-     "notes": ""
+     "amountUSD": 22273.2,
+     "rate": 6.7,
+     "notes": "",
+     "invoiceDate": "2026-09-29"
     },
     {
      "id": 1783932807149.847,
@@ -86,7 +89,8 @@
      "po": "003637",
      "amountUSD": 14638.14,
      "rate": 6.6,
-     "notes": ""
+     "notes": "",
+     "invoiceDate": "2026-09-29"
     },
     {
      "id": 1783932826454.2588,
@@ -109,16 +113,30 @@
      "etd": "2026-10-09",
      "po": "3782",
      "amountUSD": 126,
-     "rate": 6.6,
-     "notes": "BY AIR"
+     "rate": 6.69,
+     "notes": "BY AIR",
+     "invoiceDate": "2026-10-06",
+     "paidUSD": 123.48
     },
     {
      "id": 1784511581101.6895,
      "etd": "2026-07-06",
      "po": "3459",
-     "amountUSD": 12733.8,
-     "rate": 6.6,
-     "notes": "BY AIR"
+     "amountUSD": 12592.29,
+     "rate": 6.78,
+     "notes": "BY AIR",
+     "invoiceDate": "2026-06-30",
+     "paidUSD": 12340.44
+    },
+    {
+     "id": 1792380160310.7366,
+     "etd": "2026-10-15",
+     "invoiceDate": "2026-09-28",
+     "paidUSD": 27.05,
+     "po": "3799",
+     "amountUSD": 27.6,
+     "rate": 6.7,
+     "notes": ""
     }
    ]
   },
@@ -230,5 +248,5 @@
   }
  ],
  "defaultRate": 7.25,
- "updatedAt": 1792379781741
+ "updatedAt": 1792380986883
 }
