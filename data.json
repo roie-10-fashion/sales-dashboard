@@ -59,8 +59,10 @@
      "etd": "2026-07-01",
      "po": "003338",
      "amountUSD": 8775.6,
-     "rate": 6.8,
-     "notes": "BY AIR"
+     "rate": 6.78,
+     "notes": "BY AIR",
+     "invoiceDate": "2026-06-30",
+     "paidUSD": 8599.99
     },
     {
      "id": 1780625451184.6025,
@@ -228,5 +230,5 @@
   }
  ],
  "defaultRate": 7.25,
- "updatedAt": 1792379741537
+ "updatedAt": 1792379781741
 }
