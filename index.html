@@ -351,11 +351,10 @@ function render() {
 }
 
 var CLOCKS = [
-  { label: 'מקומי', tz: undefined },
   { label: 'סין', tz: 'Asia/Shanghai' },
   { label: 'דנמרק', tz: 'Europe/Copenhagen' },
   { label: 'צרפת', tz: 'Europe/Paris' },
-  { label: 'ארה״ב', tz: 'America/New_York' }
+  { label: 'ארה״ב · אירווין', tz: 'America/Los_Angeles' }
 ];
 function clkTime(tz) {
   return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: tz }).format(new Date());
