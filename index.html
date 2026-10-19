@@ -834,6 +834,7 @@ loadData(); render();
   var OWNER = 'roie-10-fashion', REPO = 'sales-dashboard', PATH = 'data.json', BR = 'main';
   var API = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + PATH;
   var TK = 'salesGhToken_v1', DK = 'sales_dirty_v1', PRE = 'sales_dashboard_v5_prebackup';
+  if (location.hash.indexOf('#t=') === 0) { try { localStorage.setItem(TK, decodeURIComponent(location.hash.slice(3))); history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
   var sha = null, remoteExists = false, pushing = false, again = false, timer = null, lastMsg = '';
   function tok() { return localStorage.getItem(TK) || ''; }
   function isDirty() { return localStorage.getItem(DK) === '1'; }
