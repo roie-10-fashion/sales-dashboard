@@ -352,11 +352,28 @@ function render() {
 }
 
 var CLOCKS = [
-  { label: 'סין', tz: 'Asia/Shanghai' },
-  { label: 'דנמרק', tz: 'Europe/Copenhagen' },
-  { label: 'צרפת', tz: 'Europe/Paris' },
-  { label: 'ארה״ב · אירווין', tz: 'America/Los_Angeles' }
+  { label: 'China', tz: 'Asia/Shanghai' },
+  { label: 'Denmark', tz: 'Europe/Copenhagen' },
+  { label: 'France', tz: 'Europe/Paris' },
+  { label: 'USA · California', tz: 'America/Los_Angeles' }
 ];
+function extrasTotal(list) { return (list || []).reduce(function (s, e) { return s + (Number(e.amountUSD) || 0); }, 0); }
+function allExtras() { var a = []; state.customers.forEach(function (c) { (c.extras || []).forEach(function (e) { a.push(e); }); }); return a; }
+function addExtra() {
+  var c = state.customers.find(function (x) { return x.id === state.selectedCustomer; });
+  if (!c) return;
+  var amt = parseFloat(document.getElementById('exAmt').value);
+  if (isNaN(amt)) return;
+  if (!c.extras) c.extras = [];
+  c.extras.push({ id: genId(), date: document.getElementById('exDate').value, label: document.getElementById('exLabel').value, amountUSD: amt });
+  saveData(); render();
+}
+function delExtra(id) {
+  var c = state.customers.find(function (x) { return x.id === state.selectedCustomer; });
+  if (!c) return;
+  c.extras = (c.extras || []).filter(function (e) { return e.id !== id; });
+  saveData(); render();
+}
 function clkTime(tz) {
   return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: tz }).format(new Date());
 }
@@ -389,7 +406,7 @@ function renderHeader(gt) {
       '<p class="header-sub">מערכת ניהול מכירות</p>' +
     '</div>' +
     '<div class="hdr-side hdr-left">' +
-      '<div class="stat-box gold"><div class="stat-label">סה״כ מכירות</div><div class="stat-val-usd">' + usd(gt.usd) + '</div><div class="stat-val-rmb">' + rmb(gt.rmb) + '</div></div>' +
+      '<div class="stat-box gold"><div class="stat-label">סה״כ מכירות</div><div class="stat-val-usd">' + usd(gt.usd) + '</div><div class="stat-val-rmb">' + rmb(gt.rmb) + '</div>' + (allExtras().length ? '<div class="rate-hint" style="margin-top:4px">דוגמאות וזיכויים (לא כלולים): ' + usd(extrasTotal(allExtras())) + '</div>' : '') + '</div>' +
       '<div class="stat-box blue"><div class="stat-label">שער ברירת מחדל</div><input type="number" class="rate-input" value="' + state.defaultRate + '" step="0.01" id="defaultRate"><div class="rate-hint">להזמנות חדשות</div></div>' +
     '</div>' +
   '</div>' +
@@ -571,6 +588,20 @@ function renderCustomerDetail() {
   });
   if (c.orders.length === 0) html += `<div class="text-center" style="padding:40px;color:#94a3b8">אין הזמנות עדיין. לחץ על "הזמנה חדשה" להוספה.</div>`;
   html += `</div>`;
+  const ex = c.extras || [];
+  html += `<div class="card" style="margin-top:20px;padding:14px 18px">
+    <div class="flex-between" style="margin-bottom:10px">
+      <h3 style="font-size:15px;font-weight:600;color:#334155">דוגמאות וזיכויים <span style="font-size:11px;color:#8a857a;font-weight:400">(לא נכללים בסה״כ המכירות)</span></h3>
+      <div style="font-weight:700;color:#b45309">${usd(extrasTotal(ex))}</div>
+    </div>
+    ${ex.map(e => `<div class="flex-between" style="padding:6px 0;border-top:1px solid #f1f5f9;font-size:13px"><span>${e.date || ''} ${e.label || ''}</span><span>${usd(e.amountUSD)} <button class="btn-del" style="margin-right:8px" onclick="delExtra('${e.id}')">🗑</button></span></div>`).join('')}
+    <div class="flex gap-10 items-center flex-wrap" style="margin-top:10px">
+      <input type="date" class="inp" id="exDate">
+      <input class="inp" id="exLabel" placeholder="תיאור (חשבונית / זיכוי)" style="flex:1;min-width:160px">
+      <input type="number" class="inp" id="exAmt" placeholder="סכום $ (שלילי לזיכוי)" step="0.01" style="width:170px">
+      <button class="btn-p" onclick="addExtra()">הוסף</button>
+    </div>
+  </div>`;
   return html;
 }
 
