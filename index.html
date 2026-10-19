@@ -170,41 +170,7 @@
 </style>
 </head>
 <body>
-<div id="splash">
-  <video id="splashVideo" autoplay muted playsinline>
-    <source src="office-intro.mp4" type="video/mp4">
-  </video>
-  <button class="splash-sound" id="splashSound" title="הפעל סאונד">🔇</button>
-  <div class="splash-skip" id="splashSkip">דלג ⏭</div>
-</div>
 <div id="app"></div>
-<script>
-(function () {
-  var splash = document.getElementById('splash');
-  var video = document.getElementById('splashVideo');
-  var soundBtn = document.getElementById('splashSound');
-  var skipBtn = document.getElementById('splashSkip');
-  function closeSplash() {
-    if (!splash) return;
-    splash.classList.add('fade-out');
-    setTimeout(function () { splash.style.display = 'none'; }, 650);
-  }
-  if (video) {
-    video.addEventListener('ended', closeSplash);
-  }
-  if (soundBtn && video) {
-    soundBtn.addEventListener('click', function () {
-      video.muted = !video.muted;
-      soundBtn.textContent = video.muted ? '🔇' : '🔊';
-    });
-  }
-  if (skipBtn) {
-    skipBtn.addEventListener('click', closeSplash);
-  }
-  // Safety net: never block the app for more than 12s even if 'ended' doesn't fire
-  setTimeout(closeSplash, 12000);
-})();
-</script>
 <script>
 let state = {
   customers: [], defaultRate: 7.25, activeTab: 'customers',
