@@ -364,8 +364,10 @@ function addExtra() {
   if (!c) return;
   var amt = parseFloat(document.getElementById('exAmt').value);
   if (isNaN(amt)) return;
+  var type = document.getElementById('exType').value;
+  amt = Math.abs(amt) * (type === 'credit' ? -1 : 1);
   if (!c.extras) c.extras = [];
-  c.extras.push({ id: genId(), date: document.getElementById('exDate').value, label: document.getElementById('exLabel').value, amountUSD: amt });
+  c.extras.push({ id: genId(), type: type, date: document.getElementById('exDate').value, label: document.getElementById('exLabel').value, amountUSD: amt });
   saveData(); render();
 }
 function delExtra(id) {
@@ -594,11 +596,12 @@ function renderCustomerDetail() {
       <h3 style="font-size:15px;font-weight:600;color:#334155">דוגמאות וזיכויים <span style="font-size:11px;color:#8a857a;font-weight:400">(לא נכללים בסה״כ המכירות)</span></h3>
       <div style="font-weight:700;color:#b45309">${usd(extrasTotal(ex))}</div>
     </div>
-    ${ex.map(e => `<div class="flex-between" style="padding:6px 0;border-top:1px solid #f1f5f9;font-size:13px"><span>${e.date || ''} ${e.label || ''}</span><span>${usd(e.amountUSD)} <button class="btn-del" style="margin-right:8px" onclick="delExtra('${e.id}')">🗑</button></span></div>`).join('')}
+    ${ex.map(e => `<div class="flex-between" style="padding:6px 0;border-top:1px solid #f1f5f9;font-size:13px"><span>${e.date || ''} <b>${e.amountUSD < 0 ? 'זיכוי' : 'דוגמה'}</b> ${e.label || ''}</span><span style="color:${e.amountUSD < 0 ? '#b91c1c' : '#15803d'}">${usd(e.amountUSD)} <button class="btn-del" style="margin-right:8px" onclick="delExtra('${e.id}')">🗑</button></span></div>`).join('')}
     <div class="flex gap-10 items-center flex-wrap" style="margin-top:10px">
+      <select class="inp" id="exType"><option value="sample">דוגמה (+ שולם)</option><option value="credit">זיכוי (−)</option></select>
       <input type="date" class="inp" id="exDate">
-      <input class="inp" id="exLabel" placeholder="תיאור (חשבונית / זיכוי)" style="flex:1;min-width:160px">
-      <input type="number" class="inp" id="exAmt" placeholder="סכום $ (שלילי לזיכוי)" step="0.01" style="width:170px">
+      <input class="inp" id="exLabel" placeholder="תיאור / מספר חשבונית" style="flex:1;min-width:160px">
+      <input type="number" class="inp" id="exAmt" placeholder="סכום $ (חיובי)" step="0.01" style="width:150px">
       <button class="btn-p" onclick="addExtra()">הוסף</button>
     </div>
   </div>`;
