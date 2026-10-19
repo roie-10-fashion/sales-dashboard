@@ -292,8 +292,9 @@ function grandTotal() {
   state.customers.forEach(c => c.orders.forEach(o => { tUSD += o.amountUSD; tRMB += getRMB(o); count++; }));
   return { usd: tUSD, rmb: tRMB, count };
 }
+function invDate(o) { return o.invoiceDate || o.etd; }
 function availableYears() {
-  const y = new Set(allOrders().map(o => o.etd.slice(0, 4)));
+  const y = new Set(allOrders().map(o => invDate(o).slice(0, 4)));
   if (y.size === 0) y.add('2025');
   return [...y].sort();
 }
@@ -440,7 +441,7 @@ function renderCustomerDetail() {
     <div class="card" style="margin-bottom:14px;border:2px dashed #eab308;background:#fffef5">
       <div style="font-size:13px;color:#92400e;margin-bottom:10px;font-weight:600">➕ הזמנה חדשה</div>
       <div class="flex gap-10 items-center flex-wrap">
-        <div><div class="field-label">תאריך ETD</div><input type="date" class="inp" id="newETD"></div>
+        <div><div class="field-label">תאריך ETD</div><input type="date" class="inp" id="newETD"></div><div><div class="field-label">תאריך חשבונית</div><input type="date" class="inp" id="newInvoice"></div>
         <div><div class="field-label">PO #</div><input class="inp" id="newOrderPO" placeholder="מספר הזמנה" style="width:130px"></div>
         <div><div class="field-label">כמות</div><input type="number" class="inp" id="newOrderQty" placeholder="יח'" style="width:90px"></div><div><div class="field-label">מחיר יחידה ($)</div><input type="number" class="inp" id="newOrderUnitPrice" placeholder="$/יח'" step="0.01" style="width:110px"></div><div><div class="field-label">סכום ($)</div><input type="number" class="inp" id="newOrderAmount" placeholder="USD" style="width:120px"></div>
         <div><div class="field-label">שער ¥/$</div><input type="number" class="inp" id="newOrderRate" value="${state.defaultRate}" step="0.01" style="width:90px"></div>
@@ -465,7 +466,7 @@ function renderCustomerDetail() {
       <div class="card" style="padding:14px 18px;border:2px solid #3b82f6;background:#f0f7ff">
         <div style="font-size:12px;color:#2563eb;margin-bottom:8px;font-weight:600">✏️ עריכת הזמנה</div>
         <div class="flex gap-10 items-center flex-wrap">
-          <div><div class="field-label">תאריך ETD</div><input type="date" class="inp" id="editETD" value="${o.etd}"></div>
+          <div><div class="field-label">תאריך ETD</div><input type="date" class="inp" id="editETD" value="${o.etd}"></div><div><div class="field-label">תאריך חשבונית</div><input type="date" class="inp" id="editInvoice" value="${o.invoiceDate || ''}"></div>
           <div><div class="field-label">PO #</div><input class="inp" id="editPO" value="${(o.po || '').replace(/"/g, '&quot;')}" placeholder="מספר הזמנה" style="width:130px"></div>
           <div><div class="field-label">כמות</div><input type="number" class="inp" id="editQty" value="${o.qty != null ? o.qty : ''}" placeholder="יח'" style="width:90px"></div><div><div class="field-label">מחיר יחידה ($)</div><input type="number" class="inp" id="editUnitPrice" value="${o.unitPrice != null ? o.unitPrice : ''}" placeholder="$/יח'" step="0.01" style="width:110px"></div><div><div class="field-label">סכום ($)</div><input type="number" class="inp" id="editAmount" value="${o.amountUSD}" style="width:120px"></div>
           <div><div class="field-label">שער ¥/$</div><input type="number" class="inp" id="editRate" value="${getRate(o)}" step="0.01" style="width:90px"></div>
@@ -487,7 +488,7 @@ function renderCustomerDetail() {
           <div class="flex items-center gap-12">
             <div>
               <span class="etd-label">ETD</span>
-              <div style="color:#334155;font-size:14px;font-weight:600">${o.etd}</div>
+              <div style="color:#334155;font-size:14px;font-weight:600">${o.etd}</div>${o.invoiceDate ? `<span class="etd-label" style="display:block;margin-top:2px">חשבונית: ${o.invoiceDate}</span>` : ''}
             </div>
             ${o.po ? `<div>
               <span class="etd-label">PO #</span>
@@ -528,12 +529,12 @@ function renderAllOrders() {
     </div>
     <div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto">
     <table>
-      <thead><tr><th>לקוח</th><th>תאריך ETD</th><th>PO #</th><th>סכום (USD)</th><th>שער</th><th>סכום (RMB)</th></tr></thead>
+      <thead><tr><th>לקוח</th><th>תאריך ETD</th><th>תאריך חשבונית</th><th>PO #</th><th>סכום (USD)</th><th>שער</th><th>סכום (RMB)</th></tr></thead>
       <tbody>`;
   orders.forEach(o => {
     html += `<tr>
       <td><span style="font-weight:600;color:#1e293b">${o.customerName}</span></td>
-      <td style="color:#475569">${o.etd}</td>
+      <td style="color:#475569">${o.etd}</td><td style="color:#475569">${o.invoiceDate || '—'}</td>
       <td style="color:#2563eb;font-weight:600">${o.po || '—'}</td>
       <td style="color:#b45309;font-weight:700">${usd(o.amountUSD)}</td>
       <td><span class="rate-badge">${fmtDec(getRate(o))}</span></td>
@@ -546,10 +547,10 @@ function renderAllOrders() {
 }
 
 function renderSummary(gt, years) {
-  const orders = allOrders().filter(o => o.etd.startsWith(state.summaryYear));
+  const orders = allOrders().filter(o => invDate(o).startsWith(state.summaryYear));
   const months = Array.from({ length: 12 }, (_, i) => ({ month: i, label: MONTHS_HE[i], totalUSD: 0, totalRMB: 0, count: 0 }));
   orders.forEach(o => {
-    const m = parseInt(o.etd.slice(5, 7)) - 1;
+    const m = parseInt(invDate(o).slice(5, 7)) - 1;
     months[m].totalUSD += o.amountUSD;
     months[m].totalRMB += getRMB(o);
     months[m].count++;
@@ -557,7 +558,7 @@ function renderSummary(gt, years) {
   const maxM = Math.max(...months.map(m => m.totalUSD), 1);
   const yearMap = {};
   allOrders().forEach(o => {
-    const y = o.etd.slice(0, 4);
+    const y = invDate(o).slice(0, 4);
     if (!yearMap[y]) yearMap[y] = { year: y, totalUSD: 0, totalRMB: 0, count: 0 };
     yearMap[y].totalUSD += o.amountUSD;
     yearMap[y].totalRMB += getRMB(o);
@@ -567,7 +568,7 @@ function renderSummary(gt, years) {
 
   let html = `
     <div class="flex-between flex-wrap gap-12" style="margin-bottom:20px">
-      <h2 style="font-size:20px;font-weight:700;color:#1e293b">סיכומים (לפי ETD)</h2>
+      <h2 style="font-size:20px;font-weight:700;color:#1e293b">סיכומים (לפי תאריך חשבונית)</h2>
       <div class="flex gap-8 items-center">
         ${state.summaryView === 'monthly' ? `
           <select class="inp" id="summaryYear" style="width:auto;padding:6px 12px">
@@ -580,7 +581,7 @@ function renderSummary(gt, years) {
 
   if (state.summaryView === 'monthly') {
     html += `<div class="card" style="margin-bottom:20px;padding:24px">
-      <h3 style="margin-bottom:16px;font-size:15px;font-weight:600;color:#64748b">מכירות חודשיות לפי ETD — ${state.summaryYear}</h3>
+      <h3 style="margin-bottom:16px;font-size:15px;font-weight:600;color:#64748b">מכירות חודשיות לפי תאריך חשבונית — ${state.summaryYear}</h3>
       <div class="chart-container">`;
     months.forEach(m => {
       const h = Math.max((m.totalUSD / maxM) * 130, m.totalUSD > 0 ? 8 : 2);
@@ -704,7 +705,7 @@ function bindEvents() {
     const po = document.getElementById('newOrderPO').value.trim();
     const notes = document.getElementById('newOrderNotes').value.trim();
     const c = state.customers.find(x => x.id === state.selectedCustomer);
-    const qtyVal = parseFloat(document.getElementById('newOrderQty').value); const unitPriceVal = parseFloat(document.getElementById('newOrderUnitPrice').value); const newOrderObj = { id: genId(), etd, po, amountUSD: amount, rate, notes }; if (qtyVal) newOrderObj.qty = qtyVal; if (unitPriceVal) newOrderObj.unitPrice = unitPriceVal; if (c) { c.orders.push(newOrderObj); state.showAddOrder = false; saveData(); render(); }
+    const qtyVal = parseFloat(document.getElementById('newOrderQty').value); const unitPriceVal = parseFloat(document.getElementById('newOrderUnitPrice').value); const newOrderObj = { id: genId(), etd, invoiceDate: (document.getElementById('newInvoice').value || undefined), po, amountUSD: amount, rate, notes }; if (qtyVal) newOrderObj.qty = qtyVal; if (unitPriceVal) newOrderObj.unitPrice = unitPriceVal; if (c) { c.orders.push(newOrderObj); state.showAddOrder = false; saveData(); render(); }
   });
 
   document.querySelectorAll('[data-edit-order]').forEach(btn => {
@@ -733,7 +734,7 @@ function bindEvents() {
     const c = state.customers.find(x => x.id === state.selectedCustomer);
     if (c) {
       const o = c.orders.find(x => x.id === state.editingOrder);
-      if (o) { o.etd = etd; o.amountUSD = amount; o.rate = rate; o.po = document.getElementById('editPO').value.trim(); o.notes = document.getElementById('editNotes').value.trim(); const qtyVal = parseFloat(document.getElementById('editQty').value); const unitPriceVal = parseFloat(document.getElementById('editUnitPrice').value); if (qtyVal) { o.qty = qtyVal; } else { delete o.qty; } if (unitPriceVal) { o.unitPrice = unitPriceVal; } else { delete o.unitPrice; } }
+      if (o) { o.etd = etd; o.invoiceDate = document.getElementById('editInvoice').value || undefined; o.amountUSD = amount; o.rate = rate; o.po = document.getElementById('editPO').value.trim(); o.notes = document.getElementById('editNotes').value.trim(); const qtyVal = parseFloat(document.getElementById('editQty').value); const unitPriceVal = parseFloat(document.getElementById('editUnitPrice').value); if (qtyVal) { o.qty = qtyVal; } else { delete o.qty; } if (unitPriceVal) { o.unitPrice = unitPriceVal; } else { delete o.unitPrice; } }
       state.editingOrder = null; saveData(); render();
     }
   });
@@ -774,8 +775,8 @@ function bindEvents() {
 
 function exportCSV() {
   const orders = [...allOrders()].sort((a, b) => b.etd.localeCompare(a.etd));
-  let csv = '\uFEFF' + 'לקוח,תאריך ETD,PO,כמות,מחיר יחידה USD,סכום USD,שער,סכום RMB,הערות\n';
-  orders.forEach(o => { csv += `"${o.customerName}",${o.etd},"${o.po || ''}",${o.qty != null ? o.qty : ''},${o.unitPrice != null ? fmtDec(o.unitPrice) : ''},${o.amountUSD},${fmtDec(getRate(o))},${Math.round(getRMB(o))},"${o.notes || ''}"\n`; });
+  let csv = '\uFEFF' + 'לקוח,תאריך ETD,תאריך חשבונית,PO,כמות,מחיר יחידה USD,סכום USD,שער,סכום RMB,הערות\n';
+  orders.forEach(o => { csv += `"${o.customerName}",${o.etd},${o.invoiceDate || ''},"${o.po || ''}",${o.qty != null ? o.qty : ''},${o.unitPrice != null ? fmtDec(o.unitPrice) : ''},${o.amountUSD},${fmtDec(getRate(o))},${Math.round(getRMB(o))},"${o.notes || ''}"\n`; });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href = url; a.download = 'sales_export.csv'; a.click();
