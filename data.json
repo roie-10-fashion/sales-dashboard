@@ -137,6 +137,16 @@
      "amountUSD": 27.6,
      "rate": 6.7,
      "notes": ""
+    },
+    {
+     "id": 1793199675165.0754,
+     "etd": "2026-12-31",
+     "po": "3938",
+     "amountUSD": 9900,
+     "rate": 6.6,
+     "notes": "",
+     "qty": 2250,
+     "unitPrice": 4.4
     }
    ],
    "extras": [
@@ -264,5 +274,5 @@
   }
  ],
  "defaultRate": 7.25,
- "updatedAt": 1792382326283
+ "updatedAt": 1793201725164
 }
