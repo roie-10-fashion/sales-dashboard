@@ -412,7 +412,7 @@ function addExtra() {
 function delExtra(id) {
   var c = state.customers.find(function (x) { return x.id === state.selectedCustomer; });
   if (!c) return;
-  c.extras = (c.extras || []).filter(function (e) { return e.id !== id; });
+  c.extras = (c.extras || []).filter(function (e) { return String(e.id) !== String(id); });
   saveData(); render();
 }
 function clkTime(tz) {
